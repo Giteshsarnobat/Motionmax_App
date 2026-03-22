@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="Dashboard.css" />
+  </head>
+  <body>
+    <!-- Mobile sidebar toggle -->
+    <button class="mobile-toggle" onclick="toggleSidebar()">
+      <i class="fas fa-bars"></i>
+    </button>
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <!-- ══ SIDEBAR ══ -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo">
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">Motion<span>Max</span></div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a class="nav-item active" href="Dashboard.html">
+          <i class="fas fa-chart-pie"></i> Dashboard
+        </a>
+        <a class="nav-item" href="Contactus.html">
+          <i class="fas fa-globe"></i> Website
+        </a>
+
+        <div class="nav-label" style="margin-top: 8px">Data</div>
+        <a class="nav-item active" href="#">
+          <i class="fas fa-envelope-open-text"></i> Contact Submissions
+        </a>
+
+        <div class="nav-label" style="margin-top: 8px">Account</div>
+        <a class="nav-item" href="Login.html">
+          <i class="fas fa-sign-in-alt"></i> Login Page
+        </a>
+        <a class="nav-item" href="Signup.html">
+          <i class="fas fa-user-plus"></i> Signup Page
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-chip">
+          <div class="user-avatar" id="sidebarAvatar">U</div>
+          <div class="user-info">
+            <div class="user-name" id="sidebarName">Loading...</div>
+            <div class="user-role" id="sidebarRole">user</div>
+          </div>
+          <button class="btn-logout" title="Logout" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ══ MAIN ══ -->
+    <div class="main">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div class="page-title">Contact Submissions</div>
+        <div class="topbar-right">
+          <button class="btn-refresh" id="refreshBtn" onclick="loadDashboard()">
+            <i class="fas fa-sync-alt"></i> Refresh
+          </button>
+          <a
+            class="btn-export"
+            id="exportBtn"
+            href="#"
+            onclick="exportExcel(event)"
+          >
+            <i class="fas fa-file-excel"></i>
+            <span>Export Excel</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Page body -->
+      <div class="page-body">
+        <!-- STAT CARDS -->
+        <div class="stats-grid">
+          <div class="stat-card indigo">
+            <span class="stat-badge live">● Live</span>
+            <div class="stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="stat-value" id="statTotal">—</div>
+            <div class="stat-label">Total Submissions</div>
+          </div>
+          <div class="stat-card cyan">
+            <span class="stat-badge up">Today</span>
+            <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+            <div class="stat-value" id="statToday">—</div>
+            <div class="stat-label">Received Today</div>
+          </div>
+          <div class="stat-card amber">
+            <span class="stat-badge up">Week</span>
+            <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+            <div class="stat-value" id="statWeek">—</div>
+            <div class="stat-label">This Week</div>
+          </div>
+          <div class="stat-card green">
+            <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+            <div class="stat-value" id="statSubjects">—</div>
+            <div class="stat-label">Unique Subjects</div>
+          </div>
+        </div>
+
+        <!-- CONTACTS TABLE -->
+        <div class="section-header">
+          <div class="section-title">All Contact Messages</div>
+          <div class="section-meta" id="tableCount">Loading...</div>
+        </div>
+
+        <div class="table-controls">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search by name, email or subject..."
+              oninput="filterTable()"
+            />
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table id="contactTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Mobile</th>
+                <th>Subject</th>
+                <th>Message</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- skeleton -->
+              <tr class="skeleton-row">
+                <td><div class="skeleton" style="width: 20px"></div></td>
+                <td><div class="skeleton" style="width: 120px"></div></td>
+                <td><div class="skeleton" style="width: 160px"></div></td>
+                <td><div class="skeleton" style="width: 100px"></div></td>
+                <td><div class="skeleton" style="width: 100px"></div></td>
+                <td><div class="skeleton" style="width: 180px"></div></td>
+                <td><div class="skeleton" style="width: 80px"></div></td>
+              </tr>
+            </tbody>
+          </table>
+
+          <div class="pagination" id="pagination" style="display: none">
+            <span id="paginationInfo"></span>
+            <div class="page-btns" id="pageBtns"></div>
+          </div>
+        </div>
+      </div>
+      <!-- /page-body -->
+    </div>
+    <!-- /main -->
+
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <i id="toastIcon" class="fas fa-check-circle"></i>
+      <span id="toastMsg"></span>
+    </div>
+    <script src="Dashboard.js"></script>
+  </body>
+</html>

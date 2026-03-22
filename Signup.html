@@ -1,65 +1,120 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> Motionmax signup page  </title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    
-     <link rel="stylesheet" href="Signup.css">
-</head>
-<body>
-
-<div class="auth-container">
-    <div class="auth-card">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Motionmax — Sign Up</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="Signup.css" />
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="auth-card">
         <div class="header">
-            <h1>Sign-up</h1><br>
-            <h3>MotionMax Designing Institute</h3>
+          <h1>Create Account</h1>
+          <h3>MotionMax Designing Institute</h3>
         </div>
-
         <form id="signupForm" novalidate>
+          <div class="form-grid">
             <div class="form-group">
-                <label>Email Address</label>
-                <div class="input-box">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="userEmail" placeholder="email address" required>
-                </div>
+              <label>Full Name</label>
+              <div class="input-box">
+                <i class="fas fa-user"></i>
+                <input
+                  type="text"
+                  id="userName"
+                  placeholder="Your full name"
+                  required
+                />
+              </div>
             </div>
-
             <div class="form-group">
-                <label>Create Password</label>
-                <div class="input-box">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="userPass" placeholder="Password" required>
-                </div>
-                <div class="strength-meter" id="meterBox">
-                    <div class="strength-bar" id="bar"></div>
-                </div>
-                <span class="strength-text" id="strengthLabel"></span>
+              <label>Mobile Number</label>
+              <div class="input-box">
+                <i class="fas fa-phone"></i>
+                <input
+                  type="tel"
+                  id="userMobile"
+                  placeholder="10-digit number"
+                  required
+                />
+              </div>
             </div>
-
             <div class="form-group">
-                <label>Confirm Password</label>
-                <div class="input-box">
-                    <i class="fas fa-shield-halved"></i>
-                    <input type="password" id="confirmPass" placeholder="Confirm password" required>
-                </div>
-                <label class="show-pass-wrap">
-                    <input type="checkbox" id="toggleCheck"> Show Passwords
-                </label>
+              <label>Email Address</label>
+              <div class="input-box">
+                <i class="fas fa-envelope"></i>
+                <input
+                  type="email"
+                  id="userEmail"
+                  placeholder="you@example.com"
+                  required
+                />
+              </div>
             </div>
-
-            <button type="submit" class="btn-submit" id="mainBtn">Create Secure Account</button>
+            <div class="form-group">
+              <label>Select Role</label>
+              <div class="select-box">
+                <i class="fas fa-user-shield icon-left"></i>
+                <select id="userRole" required>
+                  <option value="" disabled selected>Choose role</option>
+                  <option value="user">👤 User</option>
+                  <option value="admin">🛡️ Admin</option>
+                </select>
+                <i class="fas fa-chevron-down select-arrow"></i>
+              </div>
+              <span class="role-badge hidden" id="roleBadge"></span>
+            </div>
+            <div class="form-group full">
+              <label>Create Password</label>
+              <div class="input-box">
+                <i class="fas fa-lock"></i>
+                <input
+                  type="password"
+                  id="userPass"
+                  placeholder="Min 8 chars, uppercase, number & symbol"
+                  required
+                />
+              </div>
+              <div class="strength-meter" id="meterBox">
+                <div class="strength-bar" id="bar"></div>
+              </div>
+              <span class="strength-text" id="strengthLabel"></span>
+            </div>
+            <div class="form-group full">
+              <label>Confirm Password</label>
+              <div class="input-box">
+                <i class="fas fa-shield-halved"></i>
+                <input
+                  type="password"
+                  id="confirmPass"
+                  placeholder="Re-enter password"
+                  required
+                />
+              </div>
+              <label class="show-pass-wrap">
+                <input type="checkbox" id="toggleCheck" />
+                Show Passwords
+              </label>
+            </div>
+          </div>
+          <button type="submit" class="btn-submit" id="mainBtn">
+            <i class="fas fa-rocket"></i>
+            Create Secure Account
+          </button>
         </form>
-
         <div class="footer">
-            Already have an account? <a href="Login.html">Login</a>
+          Already have an account? <a href="Login.html">Login</a>
         </div>
+      </div>
     </div>
-</div>
-
-<script src="Signup.js"></script>
-
-</body>
+    <script src="Signup.js"></script>
+  </body>
 </html>
