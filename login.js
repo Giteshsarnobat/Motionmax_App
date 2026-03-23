@@ -106,7 +106,7 @@ loginForm.addEventListener('submit', async (e) => {
 
   } catch (err) {
     resetButtonState();
-    showBanner('Cannot connect to server. Make sure Node.js is running on port 5000.');
+    showBanner('Cannot connect to server.');
     console.error('Network error:', err);
   }
 });
