@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════
 //  CONFIG
 // ═══════════════════════════════════════════════════
-const API_URL = "http://localhost:5000";
+const API_URL = "https://motionmaxbackend-production-ec0d.up.railway.app";
 const PER_PAGE = 10;
 
 let allContacts = []; // full data from API

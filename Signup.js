@@ -13,7 +13,7 @@ const meterBox = document.getElementById("meterBox");
 const strengthLabel = document.getElementById("strengthLabel");
 const btn = document.getElementById("mainBtn");
 
-const API_URL = "http://localhost:5000";
+const API_URL = "https://motionmaxbackend-production-ec0d.up.railway.app";
 
 // ── Role badge preview ────────────────────────────────────────────────────────
 roleSelect.addEventListener("change", () => {

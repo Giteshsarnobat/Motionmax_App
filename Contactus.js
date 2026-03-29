@@ -34,7 +34,7 @@ document.querySelectorAll(".dropdown-menu li > a").forEach((item) => {
 });
 
 //  CONFIG
-const API_URL = "http://localhost:5000";
+const API_URL = "https://motionmaxbackend-production-ec0d.up.railway.app";
 
 //  HELPER — get field safely
 function getField(id) {
