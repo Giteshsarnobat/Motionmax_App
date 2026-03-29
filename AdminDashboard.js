@@ -32,14 +32,17 @@ try {
 // ═══════════════════════════════════════════════════
 async function logout() {
   try {
-    const rt = localStorage.getItem("refreshToken");
+    // ✅ No need to send refreshToken in body — it's in HttpOnly cookie
+    // Browser sends cookie automatically with credentials: 'include'
     await fetch(`${API_URL}/api/auth/logout`, {
       method: "POST",
+      credentials: "include", // ✅ Sends HttpOnly cookie to server for deletion
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: rt }),
     });
   } catch {}
-  localStorage.clear();
+  // ✅ Only clear accessToken and user — no refreshToken was ever here
+  localStorage.removeItem("accessToken");
+  localStorage.removeItem("user");
   window.location.href = "Login.html";
 }
 
@@ -170,8 +173,9 @@ function renderTable(data, page) {
       const idx = start + i + 1;
       const initials = (c.name || "?")[0].toUpperCase();
       const color = avatarColor(c.name);
+      const safeName = escHtml(c.name).replace(/'/g, "\'");
       return `
-    <tr style="animation-delay:${i * 0.04}s">
+    <tr id="contact-row-${c.id}" style="animation-delay:${i * 0.04}s">
       <td style="color:var(--muted);font-size:12px;">${idx}</td>
       <td>
         <div class="td-name">
@@ -195,6 +199,11 @@ function renderTable(data, page) {
       <td><span class="subject-pill" title="${escHtml(c.subject)}">${escHtml(c.subject)}</span></td>
       <td><div class="msg-preview" title="${escHtml(c.message)}">${escHtml(c.message)}</div></td>
       <td><div class="date-text">${fmtDate(c.created_at)}</div></td>
+       <td>
+        <button class="btn-delete-row" onclick="confirmDeleteOne('contacts', ${c.id}, '${safeName}')">
+          <i class="fas fa-trash-alt"></i> Delete
+        </button>
+      </td>
     </tr>`;
     })
     .join("");
@@ -283,6 +292,369 @@ function escHtml(str) {
 }
 
 // ═══════════════════════════════════════════════════
+//  TAB SWITCHING
+// ═══════════════════════════════════════════════════
+function switchTab(tab) {
+  document.getElementById("contactsTab").style.display =
+    tab === "contacts" ? "block" : "none";
+  document.getElementById("usersTab").style.display =
+    tab === "users" ? "block" : "none";
+  document.querySelectorAll(".tab-btn").forEach((b, i) => {
+    b.classList.toggle(
+      "active",
+      (i === 0 && tab === "contacts") || (i === 1 && tab === "users"),
+    );
+  });
+  if (tab === "users" && allUsers.length === 0) loadUsers();
+}
+
+// ═══════════════════════════════════════════════════
+//  CONFIRM MODAL
+// ═══════════════════════════════════════════════════
+function showModal({ title, message, onConfirm }) {
+  // Remove existing modal
+  const existing = document.getElementById("confirmModal");
+  if (existing) existing.remove();
+
+  const backdrop = document.createElement("div");
+  backdrop.className = "modal-backdrop";
+  backdrop.id = "confirmModal";
+  backdrop.innerHTML = `
+    <div class="modal-box">
+      <div class="modal-icon"><i class="fas fa-trash-alt"></i></div>
+      <div class="modal-title">${title}</div>
+      <div class="modal-msg">${message}</div>
+      <div class="modal-btns">
+        <button class="modal-btn-cancel" onclick="closeModal()">Cancel</button>
+        <button class="modal-btn-confirm" id="modalConfirmBtn">Yes, Delete</button>
+      </div>
+    </div>`;
+  document.body.appendChild(backdrop);
+
+  document
+    .getElementById("modalConfirmBtn")
+    .addEventListener("click", async () => {
+      const btn = document.getElementById("modalConfirmBtn");
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Deleting...';
+      await onConfirm();
+      closeModal();
+    });
+
+  // Click outside to cancel
+  backdrop.addEventListener("click", (e) => {
+    if (e.target === backdrop) closeModal();
+  });
+}
+
+function closeModal() {
+  const m = document.getElementById("confirmModal");
+  if (m) m.remove();
+}
+
+// ═══════════════════════════════════════════════════
+//  DELETE ONE CONTACT
+// ═══════════════════════════════════════════════════
+function confirmDeleteOne(type, id, name) {
+  const isContact = type === "contacts";
+  showModal({
+    title: `Delete ${isContact ? "Contact" : "User"}`,
+    message: `Are you sure you want to delete <strong>${name}</strong>?<br>This action cannot be undone.`,
+    onConfirm: () => (isContact ? deleteContact(id) : deleteUser(id)),
+  });
+}
+
+async function deleteContact(id) {
+  try {
+    const res = await fetch(`${API_URL}/api/contact/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      // Remove from local arrays
+      const numId = parseInt(id);
+      allContacts = allContacts.filter((c) => parseInt(c.id) !== numId);
+      //allContacts = allContacts.filter((c) => c.id !== id);
+      filtered = filtered.filter((c) => parseInt(c.id) !== numId);
+
+      // Adjust page if last item on current page was deleted
+      const totalPages = Math.ceil(filtered.length / PER_PAGE);
+      if (currentPage > totalPages && totalPages > 0) currentPage = totalPages;
+
+      // Fade out the row before removing
+      const row = document.getElementById(`contact-row-${id}`);
+      if (row) {
+        row.style.opacity = "0";
+        row.style.transition = "opacity 0.3s";
+        setTimeout(() => {
+          renderTable(filtered, currentPage);
+          updateStats(allContacts);
+        }, 300);
+      } else {
+        renderTable(filtered, currentPage);
+        updateStats(allContacts);
+      }
+
+      showToast(data.message || "Contact deleted.", "success");
+    } else {
+      showToast(data.message || "Delete failed.", "error");
+    }
+  } catch (err) {
+    showToast("Cannot connect to server.", "error");
+    console.error(err);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  DELETE ALL CONTACTS
+// ═══════════════════════════════════════════════════
+function confirmDeleteAll(type) {
+  const isContact = type === "contacts";
+  const count = isContact ? allContacts.length : allUsers.length;
+  if (count === 0) {
+    showToast(`No ${type} to delete.`, "info");
+    return;
+  }
+
+  showModal({
+    title: `Delete All ${isContact ? "Contacts" : "Users"}`,
+    message: `This will permanently delete <strong>all ${count} ${type}</strong>.<br>This action <strong>cannot be undone</strong>.`,
+    onConfirm: () => (isContact ? deleteAllContacts() : deleteAllUsers()),
+  });
+}
+
+async function deleteAllContacts() {
+  try {
+    const res = await fetch(`${API_URL}/api/contact`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      allContacts = [];
+      filtered = [];
+      renderTable(filtered, 1);
+      updateStats([]);
+      showToast(data.message || "All contacts deleted.", "success");
+    } else {
+      showToast(data.message || "Delete failed.", "error");
+    }
+  } catch (err) {
+    showToast("Cannot connect to server.", "error");
+  }
+}
+
+// ═══════════════════════════════════════════════════
+//  USERS TABLE
+// ═══════════════════════════════════════════════════
+let allUsers = [];
+let filteredUsers = [];
+let userPage = 1;
+
+async function loadUsers() {
+  document.getElementById("userTableBody").innerHTML = `
+    ${[...Array(4)]
+      .map(
+        () => `<tr class="skeleton-row">
+      ${[20, 130, 170, 100, 60, 60, 80, 60].map((w) => `<td><div class="skeleton" style="width:${w}px"></div></td>`).join("")}
+    </tr>`,
+      )
+      .join("")}`;
+
+  try {
+    const res = await fetch(`${API_URL}/api/users`, {
+      method: "GET",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      allUsers = data.users || [];
+      filteredUsers = [...allUsers];
+      userPage = 1;
+      renderUsers(filteredUsers, userPage);
+      document.getElementById("userTableCount").textContent =
+        `${allUsers.length} record${allUsers.length !== 1 ? "s" : ""}`;
+    } else {
+      document.getElementById("userTableBody").innerHTML =
+        `<tr><td colspan="8"><div class="state-box"><i class="fas fa-lock"></i><p>${data.message || "Failed to load users."}</p></div></td></tr>`;
+    }
+  } catch (err) {
+    document.getElementById("userTableBody").innerHTML =
+      `<tr><td colspan="8"><div class="state-box"><i class="fas fa-exclamation-triangle"></i><p>Cannot connect to server.</p></div></td></tr>`;
+  }
+}
+
+function renderUsers(data, page) {
+  const tbody = document.getElementById("userTableBody");
+  const start = (page - 1) * PER_PAGE;
+  const slice = data.slice(start, start + PER_PAGE);
+
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8"><div class="state-box"><i class="fas fa-users"></i><p>No users found.</p></div></td></tr>`;
+    document.getElementById("userPagination").style.display = "none";
+    document.getElementById("userTableCount").textContent = "0 records";
+    return;
+  }
+
+  const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+
+  tbody.innerHTML = slice
+    .map((u, i) => {
+      const idx = start + i + 1;
+      const initials = (u.name || "?")[0].toUpperCase();
+      const color = avatarColor(u.name);
+      const isMe = u.id === currentUser.id;
+      const rolePill =
+        u.role === "admin"
+          ? `<span style="background:rgba(245,158,11,0.15);color:#f59e0b;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">🛡 Admin</span>`
+          : `<span style="background:rgba(99,102,241,0.12);color:#818cf8;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">👤 User</span>`;
+      const statusPill = u.is_active
+        ? `<span style="background:rgba(16,185,129,0.12);color:#10b981;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">Active</span>`
+        : `<span style="background:rgba(239,68,68,0.12);color:#ef4444;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;">Inactive</span>`;
+
+      const deleteBtn = isMe
+        ? `<span style="font-size:11px;color:var(--muted);">You</span>`
+        : `<button class="btn-delete-row" onclick="confirmDeleteOne('users', ${u.id}, '${escHtml(u.name).replace(/'/g, "\'")}')"><i class="fas fa-trash-alt"></i> Delete</button>`;
+
+      return `
+    <tr id="user-row-${u.id}" style="animation-delay:${i * 0.04}s">
+      <td style="color:var(--muted);font-size:12px;">${idx}</td>
+      <td>
+        <div class="td-name">
+          <div class="avatar" style="background:${color}">${initials}</div>
+          <div>
+            <div class="name-text">${escHtml(u.name)} ${isMe ? '<span style="font-size:10px;color:var(--accent);">(You)</span>' : ""}</div>
+            <div class="name-id">#${u.id}</div>
+          </div>
+        </div>
+      </td>
+      <td><a href="mailto:${escHtml(u.email)}" style="color:var(--accent2);text-decoration:none;font-size:13px;">${escHtml(u.email)}</a></td>
+      <td style="font-size:13px;">${escHtml(u.mobile || "—")}</td>
+      <td>${rolePill}</td>
+      <td>${statusPill}</td>
+      <td><div class="date-text">${fmtDate(u.created_at)}</div></td>
+      <td>${deleteBtn}</td>
+    </tr>`;
+    })
+    .join("");
+
+  // Pagination
+  const totalPages = Math.ceil(data.length / PER_PAGE);
+  const pag = document.getElementById("userPagination");
+  pag.style.display = totalPages > 1 ? "flex" : "none";
+  document.getElementById("userPaginationInfo").textContent =
+    `Showing ${start + 1}–${Math.min(start + PER_PAGE, data.length)} of ${data.length}`;
+
+  const btns = document.getElementById("userPageBtns");
+  btns.innerHTML = "";
+  btns.appendChild(
+    makePageBtn("‹", page > 1, () => {
+      userPage = page - 1;
+      renderUsers(filteredUsers, userPage);
+    }),
+  );
+  for (
+    let p = Math.max(1, page - 2);
+    p <= Math.min(totalPages, Math.max(1, page - 2) + 4);
+    p++
+  ) {
+    const btn = makePageBtn(p, true, () => {
+      userPage = p;
+      renderUsers(filteredUsers, userPage);
+    });
+    if (p === page) btn.classList.add("active");
+    btns.appendChild(btn);
+  }
+  btns.appendChild(
+    makePageBtn("›", page < totalPages, () => {
+      userPage = page + 1;
+      renderUsers(filteredUsers, userPage);
+    }),
+  );
+
+  document.getElementById("userTableCount").textContent =
+    `${data.length} record${data.length !== 1 ? "s" : ""}`;
+}
+
+function filterUsers() {
+  const q = document
+    .getElementById("userSearchInput")
+    .value.trim()
+    .toLowerCase();
+  filteredUsers = q
+    ? allUsers.filter(
+        (u) =>
+          (u.name || "").toLowerCase().includes(q) ||
+          (u.email || "").toLowerCase().includes(q) ||
+          (u.role || "").toLowerCase().includes(q) ||
+          (u.mobile || "").toLowerCase().includes(q),
+      )
+    : [...allUsers];
+  userPage = 1;
+  renderUsers(filteredUsers, userPage);
+}
+
+async function deleteUser(id) {
+  try {
+    const res = await fetch(`${API_URL}/api/users/${id}`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      allUsers = allUsers.filter((u) => u.id !== id);
+      filteredUsers = filteredUsers.filter((u) => u.id !== id);
+      const row = document.getElementById(`user-row-${id}`);
+      if (row) {
+        row.style.opacity = "0";
+        row.style.transition = "opacity 0.3s";
+        setTimeout(() => renderUsers(filteredUsers, userPage), 300);
+      } else renderUsers(filteredUsers, userPage);
+      showToast(data.message || "User deleted.", "success");
+    } else {
+      showToast(data.message || "Delete failed.", "error");
+    }
+  } catch (err) {
+    showToast("Cannot connect to server.", "error");
+  }
+}
+
+async function deleteAllUsers() {
+  try {
+    const res = await fetch(`${API_URL}/api/users`, {
+      method: "DELETE",
+      credentials: "include",
+      headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    const data = await res.json();
+
+    if (res.ok) {
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      allUsers = allUsers.filter((u) => u.id === currentUser.id);
+      filteredUsers = [...allUsers];
+      renderUsers(filteredUsers, 1);
+      showToast(data.message || "All users deleted.", "success");
+    } else {
+      showToast(data.message || "Delete failed.", "error");
+    }
+  } catch (err) {
+    showToast("Cannot connect to server.", "error");
+  }
+}
+
+// ═══════════════════════════════════════════════════
 //  LOAD DASHBOARD — GET /api/contact
 // ═══════════════════════════════════════════════════
 async function loadDashboard() {
@@ -310,6 +682,7 @@ async function loadDashboard() {
   try {
     const response = await fetch(`${API_URL}/api/contact`, {
       method: "GET",
+      credentials: "include", // ✅ Sends HttpOnly cookie
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${accessToken}`,
@@ -380,6 +753,7 @@ async function exportExcel(e) {
   try {
     const response = await fetch(`${API_URL}/api/contact/export/excel`, {
       method: "GET",
+      credentials: "include", // ✅ Sends HttpOnly cookie
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 

@@ -16,10 +16,8 @@
     <!-- ══ SIDEBAR ══ -->
     <aside class="sidebar" id="sidebar">
       <div class="sidebar-logo">
-        <div class="logo-icon">
-          <img src="img/logo.png" alt="MOTIONMAX Logo" />
-        </div>
-        <!-- <div class="logo-text">Motion<span>Max</span></div> -->
+        <div class="logo-icon">⚡</div>
+        <div class="logo-text">Motion<span>Max</span></div>
       </div>
 
       <nav class="sidebar-nav">
@@ -53,9 +51,9 @@
             <div class="user-role" id="sidebarRole">user</div>
           </div>
         </div>
-        <!-- <button class="btn-logout" onclick="logout()">
+        <button class="btn-logout" onclick="logout()">
           <i class="fas fa-sign-out-alt"></i> Logout
-        </button> -->
+        </button>
       </div>
     </aside>
 
@@ -113,54 +111,137 @@
           </div>
         </div>
 
-        <!-- CONTACTS TABLE -->
-        <div class="section-header">
-          <div class="section-title">All Contact Messages</div>
-          <div class="section-meta" id="tableCount">Loading...</div>
+        <!-- TABS -->
+        <div class="tabs">
+          <button class="tab-btn active" onclick="switchTab('contacts')">
+            <i class="fas fa-envelope-open-text"></i> Contacts
+          </button>
+          <button class="tab-btn" onclick="switchTab('users')">
+            <i class="fas fa-users"></i> Users
+          </button>
         </div>
 
-        <div class="table-controls">
-          <div class="search-box">
-            <i class="fas fa-search"></i>
-            <input
-              type="text"
-              id="searchInput"
-              placeholder="Search by name, email or subject..."
-              oninput="filterTable()"
-            />
+        <!-- ══ CONTACTS TABLE ══ -->
+        <div id="contactsTab">
+          <div class="section-header">
+            <div class="section-title">All Contact Messages</div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div class="section-meta" id="tableCount">Loading...</div>
+              <button
+                class="btn-delete-all"
+                onclick="confirmDeleteAll('contacts')"
+                id="btnDeleteAllContacts"
+              >
+                <i class="fas fa-trash-alt"></i> Delete All
+              </button>
+            </div>
+          </div>
+
+          <div class="table-controls">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by name, email or subject..."
+                oninput="filterTable()"
+              />
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table id="contactTable">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Subject</th>
+                  <th>Message</th>
+                  <th>Date</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <tr class="skeleton-row">
+                  <td><div class="skeleton" style="width: 20px"></div></td>
+                  <td><div class="skeleton" style="width: 120px"></div></td>
+                  <td><div class="skeleton" style="width: 160px"></div></td>
+                  <td><div class="skeleton" style="width: 100px"></div></td>
+                  <td><div class="skeleton" style="width: 100px"></div></td>
+                  <td><div class="skeleton" style="width: 180px"></div></td>
+                  <td><div class="skeleton" style="width: 80px"></div></td>
+                  <td><div class="skeleton" style="width: 60px"></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination" id="pagination" style="display: none">
+              <span id="paginationInfo"></span>
+              <div class="page-btns" id="pageBtns"></div>
+            </div>
           </div>
         </div>
 
-        <div class="table-wrap">
-          <table id="contactTable">
-            <thead>
-              <tr>
-                <th>#</th>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Mobile</th>
-                <th>Subject</th>
-                <th>Message</th>
-                <th>Date</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <!-- skeleton -->
-              <tr class="skeleton-row">
-                <td><div class="skeleton" style="width: 20px"></div></td>
-                <td><div class="skeleton" style="width: 120px"></div></td>
-                <td><div class="skeleton" style="width: 160px"></div></td>
-                <td><div class="skeleton" style="width: 100px"></div></td>
-                <td><div class="skeleton" style="width: 100px"></div></td>
-                <td><div class="skeleton" style="width: 180px"></div></td>
-                <td><div class="skeleton" style="width: 80px"></div></td>
-              </tr>
-            </tbody>
-          </table>
+        <!-- ══ USERS TABLE ══ -->
+        <div id="usersTab" style="display: none">
+          <div class="section-header">
+            <div class="section-title">All Registered Users</div>
+            <div style="display: flex; align-items: center; gap: 10px">
+              <div class="section-meta" id="userTableCount">Loading...</div>
+              <button
+                class="btn-delete-all"
+                onclick="confirmDeleteAll('users')"
+                id="btnDeleteAllUsers"
+              >
+                <i class="fas fa-trash-alt"></i> Delete All
+              </button>
+            </div>
+          </div>
 
-          <div class="pagination" id="pagination" style="display: none">
-            <span id="paginationInfo"></span>
-            <div class="page-btns" id="pageBtns"></div>
+          <div class="table-controls">
+            <div class="search-box">
+              <i class="fas fa-search"></i>
+              <input
+                type="text"
+                id="userSearchInput"
+                placeholder="Search by name, email or role..."
+                oninput="filterUsers()"
+              />
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Mobile</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Joined</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody">
+                <tr class="skeleton-row">
+                  <td><div class="skeleton" style="width: 20px"></div></td>
+                  <td><div class="skeleton" style="width: 120px"></div></td>
+                  <td><div class="skeleton" style="width: 160px"></div></td>
+                  <td><div class="skeleton" style="width: 100px"></div></td>
+                  <td><div class="skeleton" style="width: 60px"></div></td>
+                  <td><div class="skeleton" style="width: 60px"></div></td>
+                  <td><div class="skeleton" style="width: 80px"></div></td>
+                  <td><div class="skeleton" style="width: 60px"></div></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination" id="userPagination" style="display: none">
+              <span id="userPaginationInfo"></span>
+              <div class="page-btns" id="userPageBtns"></div>
+            </div>
           </div>
         </div>
       </div>
