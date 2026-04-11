@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /AdminDashboard.html
+Disallow: /Dashboard.html
+Disallow: /Login.html
+Disallow: /Signup.html
+
+Sitemap: https://motionmax.co.in/sitemap.xml

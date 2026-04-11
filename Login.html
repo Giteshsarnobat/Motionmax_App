@@ -1,60 +1,80 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow">
     <title>Login | MotionMax Designing Institute</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
-    
-    <link rel="stylesheet" href="login.css">
-</head>
-<body>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+      rel="stylesheet"
+    />
 
-<div class="auth-container">
-    <div class="auth-card">
+    <link rel="stylesheet" href="./css/login.css" />
+
+    <!-- favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/assets/favicon-16x16.png">
+    <link rel="manifest" href="/assets/site.webmanifest">
+  </head>
+  <body>
+    <div class="auth-container">
+      <div class="auth-card">
         <div class="header">
-            
-            <h4>Welcome Back</h4>
-            <h1>Log-in Page</h1>
-            <h2>MotionMax Designing Institute</h2>
+          <h4>Welcome Back</h4>
+          <h1>Log-in Page</h1>
+          <h2>MotionMax Designing Institute</h2>
         </div>
 
         <form id="loginForm" novalidate>
-            <div class="form-group">
-                <label>Email Address</label>
-                <div class="input-box">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" id="loginEmail" placeholder="Enter your email" required>
-                </div>
+          <div class="form-group">
+            <label>Email Address</label>
+            <div class="input-box">
+              <i class="fas fa-envelope"></i>
+              <input
+                type="email"
+                id="loginEmail"
+                placeholder="Enter your email"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Password</label>
+            <div class="input-box">
+              <i class="fas fa-lock"></i>
+              <input
+                type="password"
+                id="loginPass"
+                placeholder="Enter your password"
+                required
+              />
             </div>
 
-            <div class="form-group">
-                <label>Password</label>
-                <div class="input-box">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" id="loginPass" placeholder="Enter your password" required>
-                </div>
-                
-                <div class="options-bar">
-                    <label class="show-pass-wrap">
-                        <input type="checkbox" id="toggleCheck"> Show Password
-                    </label>
-                    <a href="ForgotPassword.html" class="forgot-link">Forgot?</a>
-                </div>
+            <div class="options-bar">
+              <label class="show-pass-wrap">
+                <input type="checkbox" id="toggleCheck" /> Show Password
+              </label>
+              <a href="ForgotPassword.html" class="forgot-link">Forgot?</a>
             </div>
+          </div>
 
-            <button type="submit" class="btn-submit" id="loginBtn">
-                <i class="fas fa-right-to-bracket"></i> Login to Account
-            </button>
+          <button type="submit" class="btn-submit" id="loginBtn">
+            <i class="fas fa-right-to-bracket"></i> Login to Account
+          </button>
         </form>
 
         <div class="footer">
-            Don't have an account? <a href="Signup.html">Sign up</a>
+          Don't have an account? <a href="Signup.html">Sign up</a>
         </div>
+      </div>
     </div>
-</div>
-<script src="login.js"></script>
-
-</body>
+    <script src="./js/login.js"></script>
+  </body>
 </html>
